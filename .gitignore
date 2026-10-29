@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# 运行时配置：每个用户实例自己的，绝不能进仓库
+# 这里面会存 SESSDATA，误提交等于把登录态公开
+config.toml
+bili_credential.json
+history.json
+
+# 宿主自动备份的配置，同样含 token
+config_back/
+config.toml.backup.*
+*.backup.*
+
+# 编辑器 / 系统
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log

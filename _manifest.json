@@ -1,0 +1,48 @@
+{
+  "manifest_version": 2,
+  "id": "maibot.bilibili-browser",
+  "version": "1.0.0",
+  "name": "刷B站",
+  "description": "让麦麦自己刷B站：发 BV 号、av 号或链接就去看视频、读字幕、翻评论和弹幕；也可以在她主动思考时，从首页推荐、综合热门或兴趣搜索里自己挑一个看。",
+  "author": {
+    "name": "梦域 & 玄鲸",
+    "url": "https://github.com/DomainDream"
+  },
+  "license": "MIT",
+  "urls": {
+    "repository": "https://github.com/DomainDream/maibot-bilibili-browser",
+    "issues": "https://github.com/DomainDream/maibot-bilibili-browser/issues"
+  },
+  "host_application": {
+    "min_version": "1.3.0",
+    "max_version": "1.3.99"
+  },
+  "sdk": {
+    "min_version": "2.8.0",
+    "max_version": "2.10.99"
+  },
+  "dependencies": [
+    {
+      "type": "python_package",
+      "name": "httpx",
+      "version_spec": ">=0.25.0"
+    }
+  ],
+  "plugin_type": "integration",
+  "display": {
+    "icon": {
+      "type": "lucide",
+      "value": "tv"
+    }
+  },
+  "capabilities": [
+    "config.get",
+    "send.text"
+  ],
+  "i18n": {
+    "default_locale": "zh-CN",
+    "supported_locales": [
+      "zh-CN"
+    ]
+  }
+}
