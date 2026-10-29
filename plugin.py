@@ -456,7 +456,13 @@ class BilibiliBrowserPlugin(MaiBotPlugin):
     async def handle_bili_status(self, stream_id: str = "", **kwargs: Any) -> tuple[bool, str, bool]:
         """诊断用：登录状态、今日次数、冷却、最近看过什么。"""
 
+        group_id = str(kwargs.get("group_id") or "").strip()
         del kwargs  # stream_id 后面要用来发送，别删
+        if group_id:
+            # 群聊里不响应。插件配置是实例级唯一的（不存在「每人一份」），诊断输出里
+            # 又有凭证文件名和B站昵称，没必要让整个群的成员看到。
+            self.ctx.logger.info("/bili_status 在群聊 %s 里被忽略", group_id)
+            return True, "群聊里不响应该诊断命令", True
         client = await self._client_ready()
         store = await self._store_ready()
         cfg = self.config

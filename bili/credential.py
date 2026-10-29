@@ -110,7 +110,7 @@ def load_credential(path: Path) -> Credential | None:
         sessdata=str(data.get("sessdata") or "").strip(),
         bili_jct=str(data.get("bili_jct") or "").strip(),
         user_agent=str(data.get("user_agent") or "").strip(),
-        source=f"文件: {path}",
+        source=f"文件: {Path(path).name}",
     )
 
 

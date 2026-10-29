@@ -205,6 +205,21 @@ def _join_subtitle_lines(lines: list[str], *, max_chars: int = 0) -> str:
 # ------------------------------------------------------------------ 客户端
 
 
+#: 短链解析允许的域名（含子域）。短链是外部输入，落点必须落在这里面。
+_BILI_HOSTS = ("bilibili.com", "b23.tv", "bili2233.cn", "bili22.cn", "bili33.cn")
+_REDIRECT_CODES = frozenset({301, 302, 303, 307, 308})
+_MAX_SHORT_HOPS = 5
+
+
+def _is_bili_host(url: str) -> bool:
+    """URL 的 host 是否属于B站域名（含子域）。"""
+
+    host = (urllib.parse.urlparse(url).hostname or "").lower().rstrip(".")
+    if not host:
+        return False
+    return any(host == suffix or host.endswith("." + suffix) for suffix in _BILI_HOSTS)
+
+
 class BiliClient:
     """B站接口客户端。整个插件共用一个实例，``httpx.AsyncClient`` 复用连接。"""
 
@@ -740,11 +755,28 @@ class BiliClient:
         return packet
 
     async def resolve_short_link(self, url: str) -> str:
-        """跟随 ``b23.tv`` 短链，拿到最终地址。"""
+        """跟随 ``b23.tv`` 短链，拿到最终地址。
+
+        **手动逐跳跟随，每一跳都校验 host**，不交给 httpx 自动跟跳。短链是外部输入，
+        一条精心构造的链接足以把请求带去任意地址（虽然是盲 GET、拿不到回内容，也没必要
+        让它发出去）。任何一跳落到B站域名之外就立刻中止。
+        """
 
         client = self._require_client()
-        try:
-            resp = await client.get(url)
-            return str(resp.url)
-        except httpx.HTTPError as exc:
-            raise BiliError(-1, f"短链解析失败: {exc}", api="b23") from exc
+        current = url
+        for _ in range(_MAX_SHORT_HOPS):
+            try:
+                resp = await client.get(current, follow_redirects=False)
+            except httpx.HTTPError as exc:
+                raise BiliError(-1, f"短链解析失败: {exc}", api="b23") from exc
+            location = (resp.headers.get("location") or "").strip()
+            if resp.status_code not in _REDIRECT_CODES or not location:
+                # 没有下一跳了：确认这一跳本身仍在B站域名下
+                if not _is_bili_host(current):
+                    raise BiliError(-1, f"短链落点不在B站域名下: {current}", api="b23")
+                return current
+            nxt = urllib.parse.urljoin(current, location)
+            if not _is_bili_host(nxt):
+                raise BiliError(-1, f"短链跳到了非B站地址，已中止: {nxt}", api="b23")
+            current = nxt
+        raise BiliError(-1, "短链跳转次数过多，已中止", api="b23")
