@@ -73,17 +73,24 @@ def _looks_like_token(raw: str) -> bool:
 def resolve_credential_path(data_dir: Path, configured: str = "") -> Path:
     """算出凭证文件的实际路径。
 
-    ``configured`` 可以是绝对路径，也可以是相对插件 data 目录的路径；留空用默认名。
-    误填成 token 时按留空处理。
+    只接受插件 data 目录**里面**的相对路径。绝对路径、含 ``..`` 的路径、以及经由符号
+    链接跳出 data 目录的路径，一律回退默认名——这条配置不该成为往任意位置写文件的口子。
+    误填成 token 时同样按留空处理。
     """
 
+    base = Path(data_dir)
     raw = (configured or "").strip()
     if not raw or _looks_like_token(raw):
-        return Path(data_dir) / DEFAULT_CREDENTIAL_NAME
+        return base / DEFAULT_CREDENTIAL_NAME
     candidate = Path(raw).expanduser()
-    if candidate.is_absolute():
-        return candidate
-    return Path(data_dir) / candidate
+    if candidate.is_absolute() or ".." in candidate.parts:
+        return base / DEFAULT_CREDENTIAL_NAME
+    target = (base / candidate).resolve()
+    try:
+        target.relative_to(base.resolve())
+    except ValueError:  # 符号链接跳出 data 目录
+        return base / DEFAULT_CREDENTIAL_NAME
+    return target
 
 
 def load_credential(path: Path) -> Credential | None:

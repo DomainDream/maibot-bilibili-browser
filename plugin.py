@@ -141,7 +141,7 @@ class BilibiliBrowserPlugin(MaiBotPlugin):
             )
             # 第一次跑就把凭证模板落下去，主人打开就能照着填
             if ensure_credential_file(cred_path):
-                self.ctx.logger.info("已生成B站登录凭证模板：%s", cred_path)
+                self.ctx.logger.info("已生成B站登录凭证模板：%s", cred_path.name)
             self._cred_path = cred_path
             self._client = BiliClient(
                 sessdata=credential.sessdata,
@@ -465,7 +465,7 @@ class BilibiliBrowserPlugin(MaiBotPlugin):
         lines = [
             "【刷B站插件状态】",
             f"凭证来源：{client.credential_source or '未配置'}",
-            f"凭证文件：{self._cred_path}",
+            f"凭证文件：{self._cred_path.name if self._cred_path else '未初始化'}（在插件数据目录下）",
         ]
         if client.logged_in:
             is_login, detail = await client.check_login()

@@ -41,9 +41,10 @@ class AuthConfig(PluginConfigBase):
     credential_file: str = Field(
         default="",
         description=(
-            "【这里填路径，不是填 token】想把凭证放在别处时才填，留空即用默认位置："
+            "【这里填路径，不是填 token】想给凭证换个文件名时才填，必须是插件数据目录内的"
+            "相对路径（绝对路径、含 .. 的路径会被忽略并回退默认）。留空即用默认位置："
             "<MaiBot>/data/plugins/maibot.bilibili-browser/bili_credential.json，"
-            "插件首次启动会自动生成带填写说明的模板。可以填绝对路径，或相对数据目录的路径"
+            "插件首次启动会自动生成带填写说明的模板"
         ),
     )
 

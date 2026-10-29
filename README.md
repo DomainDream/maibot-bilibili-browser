@@ -57,7 +57,7 @@
 运行时还会在插件自己的数据目录里放两个文件：
 
 ```
-<MaiBot>/data/plugins/bilibili-browser/
+<MaiBot>/data/plugins/maibot.bilibili-browser/
 ├── bili_credential.json   # 登录 token，首次启动自动生成模板
 └── history.json           # 看过的视频、冷却、每日次数
 ```
@@ -76,8 +76,9 @@ OneKey 版的真实插件目录是
 
 `[auth]` —— **只影响字幕**。B站的字幕接口要求登录，不填也能刷视频、看评论、看弹幕。
 
-- `credential_file` 登录 token 的存放位置，留空用默认的
-  `data/plugins/bilibili-browser/bili_credential.json`，也可以填绝对路径。
+- `credential_file` 想给凭证换个文件名时才需要填，只接受插件数据目录内的相对路径，
+  留空就用默认的 `data/plugins/maibot.bilibili-browser/bili_credential.json`。
+  绝对路径和带 `..` 的路径会被忽略、自动回退到默认位置。
 - `sessdata` 想直接写在配置里就填这儿，优先级高于凭证文件。
 - `bili_jct` 可选，一般不填也能用。
 
@@ -101,13 +102,13 @@ OneKey 版的真实插件目录是
 默认位置：
 
 ```
-<MaiBot>/data/plugins/bilibili-browser/bili_credential.json
+<MaiBot>/data/plugins/maibot.bilibili-browser/bili_credential.json
 ```
 
 OneKey 版的实际路径通常是：
 
 ```
-%APPDATA%\MaiBotOneKeyDesktop\<实例哈希>\modules\MaiBot\data\plugins\bilibili-browser\bili_credential.json
+%APPDATA%\MaiBotOneKeyDesktop\<实例哈希>\modules\MaiBot\data\plugins\maibot.bilibili-browser\bili_credential.json
 ```
 
 插件**第一次启动会自动把这个文件生成出来**，里面带着填写说明。想换位置就把
