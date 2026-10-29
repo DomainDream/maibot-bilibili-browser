@@ -12,7 +12,7 @@
 **手动装**——把整个目录放到 `<MaiBot>/plugins/bilibili-browser/`，重启 MaiBot。
 依赖只有 `httpx`，宿主会自动装好。
 
-装完随便发一句 `/bili_status`，能收到回复就说明通了。
+装完在**私聊**里发一句 `/bili_status`，能收到回复就说明通了（群里发不会有反应，见下面「怎么知道它还灵不灵」）。
 
 ## 两条能力
 
@@ -32,7 +32,7 @@
   `popular → recommend → ranking` 回落。
 - 有冷却时间（默认 30 分钟）和每日上限（默认 8 次），7 天内看过的视频不会重复刷。
 
-诊断用 `/bili_status` 看登录状态、今天刷了几次、最近看过什么。
+诊断用 `/bili_status` 看登录状态、今天刷了几次、最近看过什么。这个命令只在私聊里响应，群里发不吭声。
 
 ## 装在哪
 
@@ -70,7 +70,7 @@ OneKey 版的真实插件目录是
 
 ## 配置
 
-改 `config.toml` 或在 WebUI 插件设置里改，六个小节：
+改 `config.toml` 或在 WebUI 插件设置里改，七个小节：
 
 `[plugin]` —— `enabled` 总开关，`config_version` 别动。
 
@@ -89,6 +89,10 @@ OneKey 版的真实插件目录是
 `[browse]` —— 自己刷的节奏：
 `source`（recommend / popular / ranking / mix）、`keywords` 兴趣池、`keyword_chance` 按关键词搜的概率、
 `cooldown_minutes`、`daily_limit`、`avoid_repeat_days`、时长上下限、评论与弹幕条数。
+
+`[status]` —— `/bili_status` 谁能用：`admin_qq` 填 QQ 号，可多个；留空则任何人在私聊里都能查，
+填了就只有名单里的人能查。群聊里这个命令永远不响应——插件配置是实例级一份，输出对每个对话
+都一样，在群里发等于广播。
 
 `[network]` —— `proxy` 和超时。
 
@@ -112,7 +116,7 @@ OneKey 版的实际路径通常是：
 ```
 
 插件**第一次启动会自动把这个文件生成出来**，里面带着填写说明。想换位置就把
-`config.toml` 里的 `[auth] credential_file` 改成别的路径（绝对路径或相对数据目录的路径）。
+`config.toml` 里的 `[auth] credential_file` 改成别的**文件名**。只认数据目录内的相对路径，绝对路径和带 `..` 的写法会被忽略、自动回退到默认位置（见上面「配置」一节）。
 
 文件内容长这样，只需要填 `sessdata` 一项：
 
@@ -159,10 +163,14 @@ Firefox 是 `F12` → **存储** → **Cookie** → `https://www.bilibili.com`�
 发 `/bili_status`，会显示三层信息：
 
 ```
-凭证来源：文件: ...\bili_credential.json
-凭证文件：...\bili_credential.json
+凭证来源：文件: C:\Users\你的用户名\AppData\Roaming\MaiBotOneKeyDesktop\<实例哈希>\modules\MaiBot\data\plugins\maibot.bilibili-browser\bili_credential.json
+凭证文件：C:\Users\你的用户名\AppData\Roaming\MaiBotOneKeyDesktop\<实例哈希>\modules\MaiBot\data\plugins\maibot.bilibili-browser\bili_credential.json
 B站登录：有效（你的B站昵称）
 ```
+
+路径给的是完整绝对路径，可以直接复制过去改文件，不用自己翻目录。
+因为这个命令只在私聊响应、群里不吭声，路径不会跑到别人眼前；想让私聊也只有你能查，把
+QQ 号填进 `[status] admin_qq` 即可。
 
 如果显示「SESSDATA 失效或已过期，需要重新复制一份」，就按上面步骤重新拿一次——
 B站的登录态会到期，换设备登录、改密码、长时间不活跃都可能让它失效，

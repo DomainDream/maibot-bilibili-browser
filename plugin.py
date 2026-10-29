@@ -141,7 +141,7 @@ class BilibiliBrowserPlugin(MaiBotPlugin):
             )
             # 第一次跑就把凭证模板落下去，主人打开就能照着填
             if ensure_credential_file(cred_path):
-                self.ctx.logger.info("已生成B站登录凭证模板：%s", cred_path.name)
+                self.ctx.logger.info("已生成B站登录凭证模板：%s", cred_path)
             self._cred_path = cred_path
             self._client = BiliClient(
                 sessdata=credential.sessdata,
@@ -160,7 +160,7 @@ class BilibiliBrowserPlugin(MaiBotPlugin):
 
         data_dir = getattr(getattr(self.ctx, "paths", None), "data_dir", None)
         if data_dir is None:
-            data_dir = Path("data") / "plugins" / "bilibili-browser"
+            data_dir = Path("data") / "plugins" / "maibot.bilibili-browser"
         return Path(data_dir)
 
     async def _client_ready(self) -> BiliClient:
@@ -457,12 +457,21 @@ class BilibiliBrowserPlugin(MaiBotPlugin):
         """诊断用：登录状态、今日次数、冷却、最近看过什么。"""
 
         group_id = str(kwargs.get("group_id") or "").strip()
+        user_id = str(kwargs.get("user_id") or "").strip()
         del kwargs  # stream_id 后面要用来发送，别删
         if group_id:
-            # 群聊里不响应。插件配置是实例级唯一的（不存在「每人一份」），诊断输出里
-            # 又有凭证文件名和B站昵称，没必要让整个群的成员看到。
+            # 群聊里一律不响应。插件配置是实例级唯一的（不存在「每人一份」），诊断输出
+            # 对每个对话都一样，在群里发一次等于广播给所有人。
             self.ctx.logger.info("/bili_status 在群聊 %s 里被忽略", group_id)
             return True, "群聊里不响应该诊断命令", True
+        admins = {
+            str(item).strip()
+            for item in (getattr(self.config.status, "admin_qq", None) or [])
+            if str(item).strip()
+        }
+        if admins and user_id not in admins:
+            self.ctx.logger.info("/bili_status 被白名单外的 QQ %s 请求，已忽略", user_id or "?")
+            return True, "没有权限使用这个诊断命令", True
         client = await self._client_ready()
         store = await self._store_ready()
         cfg = self.config
@@ -471,7 +480,7 @@ class BilibiliBrowserPlugin(MaiBotPlugin):
         lines = [
             "【刷B站插件状态】",
             f"凭证来源：{client.credential_source or '未配置'}",
-            f"凭证文件：{self._cred_path.name if self._cred_path else '未初始化'}（在插件数据目录下）",
+            f"凭证文件：{self._cred_path or '未初始化'}",
         ]
         if client.logged_in:
             is_login, detail = await client.check_login()

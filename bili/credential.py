@@ -8,7 +8,7 @@
 
     <data_dir>/bili_credential.json
     # 实际路径通常是
-    # <MaiBot>/data/plugins/bilibili-browser/bili_credential.json
+    # <MaiBot>/data/plugins/maibot.bilibili-browser/bili_credential.json
 
 优先级：``config.toml`` 的 ``[auth]`` 里填了就用配置，没填才读这个文件。
 """
@@ -110,7 +110,7 @@ def load_credential(path: Path) -> Credential | None:
         sessdata=str(data.get("sessdata") or "").strip(),
         bili_jct=str(data.get("bili_jct") or "").strip(),
         user_agent=str(data.get("user_agent") or "").strip(),
-        source=f"文件: {Path(path).name}",
+        source=f"文件: {path}",
     )
 
 

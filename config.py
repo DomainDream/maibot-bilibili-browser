@@ -17,7 +17,10 @@ class PluginSectionConfig(PluginConfigBase):
     __ui_order__ = 0
 
     enabled: bool = Field(default=True, description="是否启用插件")
-    config_version: str = Field(default="1.0.0", description="配置版本")
+    config_version: str = Field(
+        default="1.1.0",
+        description="配置结构版本：加删配置字段时往上走，跟插件版本号不是一回事，平时别改",
+    )
 
 
 class AuthConfig(PluginConfigBase):
@@ -95,6 +98,23 @@ class BrowseConfig(PluginConfigBase):
     danmaku_limit: int = Field(default=30, description="自己刷时弹幕抽样几条")
 
 
+class StatusConfig(PluginConfigBase):
+    """诊断命令 /bili_status 谁能用。"""
+
+    __ui_label__ = "诊断命令"
+    __ui_icon__ = "shield"
+    __ui_order__ = 4
+
+    admin_qq: list[str] = Field(
+        default_factory=list,
+        description=(
+            "允许使用 /bili_status 的 QQ 号，可以填多个。留空 = 任何人在私聊里都能查；"
+            "填了 = 只有这些 QQ 能查。群聊里这个命令永远不响应——插件配置是实例级一份，"
+            "输出对每个对话都一样，在群里发等于广播给所有人"
+        ),
+    )
+
+
 class NetworkConfig(PluginConfigBase):
     """网络。"""
 
@@ -115,4 +135,5 @@ class BilibiliBrowserConfig(PluginConfigBase):
     auth: AuthConfig = Field(default_factory=AuthConfig)
     watch: WatchConfig = Field(default_factory=WatchConfig)
     browse: BrowseConfig = Field(default_factory=BrowseConfig)
+    status: StatusConfig = Field(default_factory=StatusConfig)
     network: NetworkConfig = Field(default_factory=NetworkConfig)
